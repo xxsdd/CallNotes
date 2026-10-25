@@ -1,0 +1,98 @@
+name: Build and verify Windows installer
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Source release tag
+        required: true
+        default: v0.1.3
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: Validate tag
+        shell: pwsh
+        run: |
+          if ($env:RELEASE_TAG -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw 'Invalid tag' }
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare isolated build environment and native bridge
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'CallNotesBuild'
+          New-Item -ItemType Directory -Force $root | Out-Null
+          "BUILD_ROOT=$root" >> $env:GITHUB_ENV
+          python -m venv "$root\.venv"
+          & "$root\.venv\Scripts\python.exe" -m pip install -r packaging/requirements-ui.txt -r packaging/requirements-worker.txt
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed' }
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          $visualStudio = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $vc = Get-ChildItem (Join-Path $visualStudio 'VC\Tools\MSVC') -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          $sdk = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10'
+          $sdkVersion = Get-ChildItem (Join-Path $sdk 'Include') -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'um\Windows.h') } | Sort-Object Name -Descending | Select-Object -First 1
+          $compiler = Join-Path $vc.FullName 'bin\Hostx64\x64\cl.exe'
+          $env:PATH = (Split-Path $compiler)+';'+$env:PATH
+          $env:INCLUDE = "$($vc.FullName)\include;$sdk\Include\$($sdkVersion.Name)\ucrt;$sdk\Include\$($sdkVersion.Name)\shared;$sdk\Include\$($sdkVersion.Name)\um;$sdk\Include\$($sdkVersion.Name)\winrt"
+          $env:LIB = "$($vc.FullName)\lib\x64;$sdk\Lib\$($sdkVersion.Name)\ucrt\x64;$sdk\Lib\$($sdkVersion.Name)\um\x64"
+          Push-Location callnotes/native
+          & $compiler /nologo /utf-8 /std:c++17 /EHsc /O2 /MT /LD /W4 /D_WIN32_WINNT=0x0A00 process_loopback.cpp /link /OUT:process_loopback.dll Ole32.lib Mmdevapi.lib RuntimeObject.lib
+          if ($LASTEXITCODE -ne 0) { throw 'Native bridge compilation failed' }
+          Pop-Location
+      - name: Fetch pinned models and build offline installer
+        shell: pwsh
+        run: |
+          $python = "$env:BUILD_ROOT\.venv\Scripts\python.exe"
+          & $python packaging/download_assets.py --root $env:BUILD_ROOT
+          if ($LASTEXITCODE -ne 0) { throw 'Asset preparation failed' }
+          & $python packaging/build_windows.py --root $env:BUILD_ROOT --ui-python $python --worker-python $python
+          if ($LASTEXITCODE -ne 0) { throw 'Frozen build failed' }
+          & $python packaging/package_release.py --root $env:BUILD_ROOT
+          if ($LASTEXITCODE -ne 0) { throw 'Installer build failed' }
+          # Reclaim only checked scratch outputs before the installation test.
+          foreach ($relative in @('dist','models','downloads','release\payload.zip')) {
+            $target = [IO.Path]::GetFullPath((Join-Path $env:BUILD_ROOT $relative))
+            if (-not $target.StartsWith($env:BUILD_ROOT+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe scratch path' }
+            Remove-Item -LiteralPath $target -Recurse -Force
+          }
+      - name: Install and verify on this clean Windows runner
+        shell: pwsh
+        run: |
+          $info = Get-Content "$env:BUILD_ROOT\release\build-info.json" -Raw | ConvertFrom-Json
+          $setup = Join-Path "$env:BUILD_ROOT\release" $info.setup
+          $installDir = Join-Path $env:RUNNER_TEMP 'CallNotes Installed'
+          $process = Start-Process -FilePath $setup -ArgumentList '--test-install',('"'+$installDir+'"') -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw 'Installer failed' }
+          $checks = Join-Path $env:RUNNER_TEMP 'callnotes-verification'
+          New-Item -ItemType Directory -Force $checks | Out-Null
+          $python = "$env:BUILD_ROOT\.venv\Scripts\python.exe"
+          Push-Location $checks
+          & $python "$env:GITHUB_WORKSPACE\packaging\verify_windows.py" --app $installDir --out $checks --speech "$env:GITHUB_WORKSPACE\tests\fixtures\meeting-en.wav"
+          if ($LASTEXITCODE -ne 0) { throw 'Installed binary verification failed' }
+          Pop-Location
+      - name: Upload verified release files
+        shell: pwsh
+        run: |
+          gh release upload $env:RELEASE_TAG "$env:BUILD_ROOT\release\CallNotes-Setup-*-Windows-x64.exe" "$env:BUILD_ROOT\release\SHA256SUMS.txt" "$env:BUILD_ROOT\release\build-info.json" --repo $env:GITHUB_REPOSITORY --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }
+      - name: Keep compact verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clean-windows-build-verification
+          path: |
+            ${{ runner.temp }}/callnotes-verification/verification.json
+            ${{ runner.temp }}/callnotes-verification/ui-*.png
+            ${{ runner.temp }}/CallNotesBuild/release/build-info.json
+          if-no-files-found: warn
+          retention-days: 7
