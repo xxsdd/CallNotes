@@ -2,9 +2,10 @@
 
 Windows 上的录音、实时字幕与通话文字稿分析工具。把电脑里聊过的事情，变成可以查找、回听和追问的本地记录。
 
-[观看一分钟宣传视频](docs/callnotes-promo.mp4) · [更新日志](CHANGELOG.md)
+[下载宣传视频](docs/callnotes-promo.mp4) · [更新日志](CHANGELOG.md)
 
-![通话笺分析与原话来源演示](docs/promo-preview.jpg)
+https://github.com/user-attachments/assets/f13b27e5-c227-45a1-877c-51961f1a0849
+
 
 ## 已有功能
 
