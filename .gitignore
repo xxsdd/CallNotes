@@ -1,0 +1,46 @@
+# Local runtimes and build products
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.spec
+*.obj
+*.lib
+*.exp
+*.dll
+
+# Personal configuration, credentials and local records
+.env
+.env.*
+!.env.example
+auth.json
+settings.json
+config.local.*
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.log
+*.lock
+*.tmp
+records/
+recordings/
+data/
+cache/
+models/
+runtime/
+transcript*.json
+*.wav
+*.pcm
+*.mp3
+
+# Editor and OS files
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
