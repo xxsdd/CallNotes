@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from .text_normalization import simplified
 
-DEFAULT_ROOT = Path(os.environ.get('CALLNOTES_DATA', r'D:\Apps\CallNotes-Data'))
+from .runtime import DATA_ROOT as DEFAULT_ROOT
 
 
 def atomic_json(path: Path, value):

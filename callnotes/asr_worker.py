@@ -12,13 +12,15 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from text_normalization import simplified
 from asr_quality import decode_speech, uncertain_segment
+from inference import load_whisper
+try:
+    from .runtime import prepare_environment
+except ImportError:
+    from runtime import prepare_environment
 
 os.environ['HF_HUB_OFFLINE'] = '1'
 os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
-os.environ['HF_HOME'] = r'D:\Apps\VoiceStudio-Environment\models'
-os.environ['TEMP'] = r'D:\Apps\CallNotes-Cache\tmp'
-os.environ['TMP'] = os.environ['TEMP']
-os.environ['NUMBA_CACHE_DIR'] = r'D:\Apps\CallNotes-Cache\numba'
+prepare_environment()
 
 DLL_HANDLES = []
 runtime = Path(r'D:\Apps\CallNotes\runtime\cudnn8')
@@ -49,9 +51,8 @@ def main():
     folder = Path(sys.argv[1])
     model_path = Path(sys.argv[2])
     if not (model_path / 'model.bin').exists():
-        raise RuntimeError('本地 large-v3 模型文件缺失；未启动在线下载。')
-    emit({'type': 'progress', 'text': '正在加载本地 large-v3（CUDA）…'})
-    model = WhisperModel(str(model_path), device='cuda', compute_type='float16', local_files_only=True)
+        raise RuntimeError('本地字幕模型文件缺失，请重新安装完整版或选择完整模型目录。')
+    model = load_whisper(model_path, lambda text: emit({'type': 'progress', 'text': text}))
     meta = json.loads((folder / 'audio.json').read_text(encoding='utf-8'))
     all_segments = []
     language_mode = sys.argv[3] if len(sys.argv) > 3 else 'zh_en'

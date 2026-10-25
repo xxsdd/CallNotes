@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QObject, QRunnable, Signal
 
-VOICE_ROOT = Path(r'D:\Apps\VoiceStudio-Environment')
+from .runtime import CACHE_ROOT, VOICE_ROOT, model_directory, worker_command, default_python
 
 
 class Signals(QObject):
@@ -46,18 +46,10 @@ class Transcriber:
     def run(self, folder, settings, progress, region=None):
         if self.cancelled.is_set():
             raise RuntimeError('处理已停止。')
-        python = Path(settings.get('asr_python', str(VOICE_ROOT / 'project' / '.venv' / 'Scripts' / 'python.exe')))
-        model_path = settings.get('asr_model', '')
-        if not model_path:
-            choices = list((VOICE_ROOT / 'models' / 'models--Systran--faster-whisper-large-v3' / 'snapshots').glob('*/model.bin'))
-            if not choices:
-                raise RuntimeError('没有找到已下载的 large-v3 模型，请在设置中指定本地模型目录。')
-            model_path = str(choices[0].parent)
-        if not python.exists():
-            raise RuntimeError('本地转录的 Python 环境不存在，请在设置中选择。')
+        model_path = model_directory(settings)
         env = os.environ.copy()
         env['PYTHONIOENCODING'] = 'utf-8'
-        cache = Path(r'D:\Apps\CallNotes-Cache')
+        cache = CACHE_ROOT
         (cache / 'tmp').mkdir(parents=True, exist_ok=True)
         env['TEMP'] = str(cache / 'tmp')
         env['TMP'] = env['TEMP']
@@ -67,9 +59,9 @@ class Transcriber:
             with self.process_lock:
                 if self.cancelled.is_set():
                     raise RuntimeError('处理已停止。')
-                self.proc = subprocess.Popen([str(python), str(Path(__file__).with_name('asr_worker.py')),
-                                              str(folder), model_path, settings.get('asr_language', 'zh_en'),
-                                          json.dumps(region), json.dumps({})], stdout=subprocess.PIPE,
+                self.proc = subprocess.Popen(worker_command('asr_worker', settings,
+                                              folder, model_path, settings.get('asr_language', 'zh_en'),
+                                          json.dumps(region), json.dumps({})), stdout=subprocess.PIPE,
                                              stderr=log, text=True, encoding='utf-8', errors='replace',
                                              env=env, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
             for line in self.proc.stdout:
@@ -89,24 +81,24 @@ class Transcriber:
         if self.cancelled.is_set():
             raise RuntimeError('转录已中断，录音已保存，可稍后重试。')
         if return_code or result is None:
-            raise RuntimeError('\n'.join(errors) or '本地转录失败，录音保留。详情见 D:\\Apps\\CallNotes-Cache\\asr-last.log')
+            raise RuntimeError('\n'.join(errors) or f'本地转录失败，录音保留。详情见 {cache / "asr-last.log"}')
         return result
 
     def identify_speakers(self, folder, settings, count, progress):
         if self.cancelled.is_set():
             raise RuntimeError('处理已停止。')
-        python = settings.get('asr_python', str(VOICE_ROOT / 'project' / '.venv' / 'Scripts' / 'python.exe'))
         env = os.environ.copy()
         env['PYTHONIOENCODING'] = 'utf-8'
-        env['TEMP'] = env['TMP'] = r'D:\Apps\CallNotes-Cache\tmp'
+        env['TEMP'] = env['TMP'] = str(CACHE_ROOT / 'tmp')
+        Path(env['TEMP']).mkdir(parents=True, exist_ok=True)
         result, errors = None, []
-        log_path = Path(r'D:\Apps\CallNotes-Cache\diarization-last.log')
+        log_path = CACHE_ROOT / 'diarization-last.log'
         with log_path.open('w', encoding='utf-8') as log:
             with self.process_lock:
                 if self.cancelled.is_set():
                     raise RuntimeError('处理已停止。')
-                self.proc = subprocess.Popen([python, str(Path(__file__).with_name('diarization_worker.py')),
-                    str(folder), str(count)], stdout=subprocess.PIPE, stderr=log,
+                self.proc = subprocess.Popen(worker_command('diarization_worker', settings,
+                    folder, count), stdout=subprocess.PIPE, stderr=log,
                     text=True, encoding='utf-8', errors='replace', env=env,
                     creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
             for line in self.proc.stdout:
@@ -129,14 +121,13 @@ class Transcriber:
         if self.cancelled.is_set():
             raise RuntimeError('处理已停止。')
         progress('正在本机提取音轨，原文件保持不变…')
-        python = settings.get('asr_python', str(VOICE_ROOT / 'project' / '.venv' / 'Scripts' / 'python.exe'))
         env = os.environ.copy()
         env['PYTHONIOENCODING'] = 'utf-8'
         with self.process_lock:
             if self.cancelled.is_set():
                 raise RuntimeError('导入已停止。')
-            self.proc = subprocess.Popen([python, str(Path(__file__).with_name('media_worker.py')),
-                str(source), str(folder)], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            self.proc = subprocess.Popen(worker_command('media_worker', settings,
+                source, folder), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, encoding='utf-8', errors='replace', env=env,
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
         stdout, stderr = self.proc.communicate()
@@ -170,19 +161,14 @@ class LiveTranscriber(Transcriber):
     def preload(self, settings, progress):
         if self.cancelled.is_set():
             raise RuntimeError('字幕处理已停止。')
-        python = Path(settings.get('asr_python', str(VOICE_ROOT / 'project' / '.venv' / 'Scripts' / 'python.exe')))
-        model = settings.get('asr_model', '')
-        if not model:
-            choices = list((VOICE_ROOT / 'models' / 'models--Systran--faster-whisper-large-v3' / 'snapshots').glob('*/model.bin'))
-            if not choices:
-                raise RuntimeError('没有找到本地字幕模型；录音继续保存，可稍后转录。')
-            model = str(choices[0].parent)
+        model = str(model_directory(settings))
         env = os.environ.copy()
         env['PYTHONIOENCODING'] = 'utf-8'
-        env['TEMP'] = r'D:\Apps\CallNotes-Cache\tmp'
+        env['TEMP'] = str(CACHE_ROOT / 'tmp')
         env['TMP'] = env['TEMP']
         (Path(env['TEMP'])).mkdir(parents=True, exist_ok=True)
-        signature = (str(python), str(model))
+        command = worker_command('live_worker', settings, '--server', model)
+        signature = tuple(command)
         with self.process_lock:
             if self.signature != signature or not self.proc or self.proc.poll() is not None or self.failure:
                 if self.cancelled.is_set():
@@ -196,9 +182,8 @@ class LiveTranscriber(Transcriber):
                 self.failure = ''
                 self.events = events = queue.Queue()
                 self.signature = signature
-                with Path(r'D:\Apps\CallNotes-Cache\live-last.log').open('w', encoding='utf-8') as log:
-                    self.proc = proc = subprocess.Popen([str(python), str(Path(__file__).with_name('live_worker.py')),
-                               '--server', model], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
+                with (CACHE_ROOT / 'live-last.log').open('w', encoding='utf-8') as log:
+                    self.proc = proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
                                text=True, encoding='utf-8', errors='replace', bufsize=1, env=env,
                                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
 

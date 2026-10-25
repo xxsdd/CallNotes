@@ -866,7 +866,7 @@ class WindowTests(unittest.TestCase):
         for _ in range(2):
             def cancel(dialog):
                 tabs = dialog.findChild(QTabWidget, 'settingsTabs')
-                self.assertEqual([tabs.tabText(i) for i in range(tabs.count())], ['录音与声音', '文字识别', '本地存储', '阅读排版'])
+                self.assertEqual([tabs.tabText(i) for i in range(tabs.count())], ['录音与声音', '文字识别', 'AI 分析', '本地存储', '阅读排版'])
                 self.assertIs(tabs.widget(0), window.audio_settings)
                 window.mic_box.setCurrentIndex(1)
                 window.capture_mode.setCurrentIndex(window.capture_mode.findData('process'))

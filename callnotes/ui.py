@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QComboBox, QDial
 
 from .audio import Recorder, devices
 from .process_audio import enumerate_voice_apps, support_error
-from .codex_client import CodexClient, REPORT, is_report
+from .codex_client import CodexClient, REPORT, is_report, start_login
+from .runtime import bundled_worker, default_python
 from .jobs import Job, Transcriber, LiveTranscriber
 from .storage import DEFAULT_ROOT, Store, atomic_json, read_json, stamp, transcript_text
 from .turns import speaker_turns, join_text
@@ -1918,15 +1919,19 @@ class MainWindow(QMainWindow):
         form = QFormLayout()
         form.setVerticalSpacing(16)
         data = QLineEdit(str(self.store.root))
-        python = QLineEdit(config.get('asr_python', r'D:\Apps\VoiceStudio-Environment\project\.venv\Scripts\python.exe'))
+        python = QLineEdit(config.get('asr_python', default_python()))
         model = QLineEdit(config.get('asr_model', ''))
         language = StudioComboBox()
         language.addItem('中文、英文和中英混说', 'zh_en')
         language.addItem('主要中文（保留英文词）', 'zh')
         language.addItem('主要英文', 'en')
         language.setCurrentIndex(max(0, language.findData(config.get('asr_language', 'zh_en'))))
-        form.addRow('转录 Python', python)
-        form.addRow('模型目录（留空自动检测）', model)
+        if bundled_worker().is_file():
+            python.setText(default_python())
+            form.addRow('识别引擎', QLabel('已内置，无需安装或配置 Python'))
+        else:
+            form.addRow('转录 Python', python)
+        form.addRow('自选模型目录（留空使用内置／已有模型）', model)
         form.addRow('识别语言', language)
         form.addRow('说话人区分', QLabel('默认只生成文字稿；在单条记录中点击“区分说话人”并填写人数后运行。'))
         recognition_layout.addLayout(form)
@@ -1936,6 +1941,24 @@ class MainWindow(QMainWindow):
         recognition_layout.addWidget(recognition_note)
         recognition_layout.addStretch()
         tabs.addTab(recognition, '文字识别')
+        account = QWidget()
+        account_layout = QVBoxLayout(account)
+        account_layout.setContentsMargins(0, 18, 0, 0)
+        account_note = QLabel('录音与字幕在本机完成，无需登录。\n使用 AI 分析时，请登录你自己的 Codex 账号；分析使用该账号的额度。\n点击下方按钮，在浏览器中完成登录，之后返回通话笺即可。')
+        account_note.setWordWrap(True)
+        account_layout.addWidget(account_note)
+        login_status = QLabel('')
+        login_status.setWordWrap(True)
+        def login():
+            try:
+                start_login()
+                login_status.setText('已打开 Codex 登录。请在浏览器完成操作，然后返回分析面板刷新模型。')
+            except Exception as exc:
+                login_status.setText('无法打开登录：' + str(exc))
+        account_layout.addWidget(button('登录 Codex', login, 'blue'), 0, Qt.AlignLeft)
+        account_layout.addWidget(login_status)
+        account_layout.addStretch()
+        tabs.addTab(account, 'AI 分析')
         local = QWidget()
         local_layout = QVBoxLayout(local)
         local_layout.setContentsMargins(0, 18, 0, 0)

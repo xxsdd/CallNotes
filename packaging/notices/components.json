@@ -1,0 +1,307 @@
+[
+  {
+    "package": "altgraph",
+    "version": "0.17.5",
+    "licenses": [
+      "altgraph-altgraph-0.17.5.dist-info_LICENSE"
+    ]
+  },
+  {
+    "package": "anyio",
+    "version": "4.15.1",
+    "licenses": [
+      "anyio-anyio-4.15.1.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "av",
+    "version": "15.1.0",
+    "licenses": [
+      "av-av-15.1.0.dist-info_licenses_AUTHORS.py",
+      "av-av-15.1.0.dist-info_licenses_AUTHORS.rst",
+      "av-av-15.1.0.dist-info_licenses_LICENSE.txt",
+      "av-av-15.1.0.dist-info_licenses___pycache___AUTHORS.cpython-311.pyc"
+    ]
+  },
+  {
+    "package": "click",
+    "version": "8.5.0",
+    "licenses": [
+      "click-click-8.5.0.dist-info_licenses_LICENSE.txt"
+    ]
+  },
+  {
+    "package": "colorama",
+    "version": "0.4.6",
+    "licenses": [
+      "colorama-colorama-0.4.6.dist-info_licenses_LICENSE.txt"
+    ]
+  },
+  {
+    "package": "ctranslate2",
+    "version": "4.4.0",
+    "licenses": []
+  },
+  {
+    "package": "faster-whisper",
+    "version": "1.2.1",
+    "licenses": [
+      "faster-whisper-faster_whisper-1.2.1.dist-info_LICENSE"
+    ]
+  },
+  {
+    "package": "filelock",
+    "version": "4.2.4",
+    "licenses": [
+      "filelock-filelock-4.2.4.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "flatbuffers",
+    "version": "25.12.19",
+    "licenses": []
+  },
+  {
+    "package": "fsspec",
+    "version": "2026.9.0",
+    "licenses": [
+      "fsspec-fsspec-2026.9.0.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "h11",
+    "version": "0.16.0",
+    "licenses": [
+      "h11-h11-0.16.0.dist-info_licenses_LICENSE.txt"
+    ]
+  },
+  {
+    "package": "hf-xet",
+    "version": "1.7.0",
+    "licenses": [
+      "hf-xet-hf_xet-1.7.0.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "httpcore2",
+    "version": "2.16.0",
+    "licenses": [
+      "httpcore2-httpcore2-2.16.0.dist-info_licenses_LICENSE.md"
+    ]
+  },
+  {
+    "package": "httpx2",
+    "version": "2.16.0",
+    "licenses": [
+      "httpx2-httpx2-2.16.0.dist-info_licenses_LICENSE.md"
+    ]
+  },
+  {
+    "package": "huggingface_hub",
+    "version": "2.3.0",
+    "licenses": [
+      "huggingface_hub-huggingface_hub-2.3.0.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "idna",
+    "version": "3.20",
+    "licenses": [
+      "idna-idna-3.20.dist-info_licenses_LICENSE.md"
+    ]
+  },
+  {
+    "package": "numpy",
+    "version": "2.4.6",
+    "licenses": [
+      "numpy-numpy-2.4.6.dist-info_licenses_LICENSE.txt",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy__core_include_numpy_libdivide_LICENSE.txt",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy__core_src_common_pythoncapi-compat_COPYING",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy__core_src_highway_LICENSE",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy__core_src_multiarray_dragon4_LICENSE.txt",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy__core_src_npysort_x86-simd-sort_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy__core_src_umath_svml_LICENSE",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_fft_pocketfft_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_linalg_lapack_lite_LICENSE.txt",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_ma_LICENSE",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_random_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_random_src_distributions_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_random_src_mt19937_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_random_src_pcg64_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_random_src_philox_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_random_src_sfc64_LICENSE.md",
+      "numpy-numpy-2.4.6.dist-info_licenses_numpy_random_src_splitmix64_LICENSE.md",
+      "numpy-numpy__core_include_numpy_random_LICENSE.txt",
+      "numpy-numpy_ma_LICENSE"
+    ]
+  },
+  {
+    "package": "onnxruntime",
+    "version": "1.31.0",
+    "licenses": [
+      "onnxruntime-onnxruntime_LICENSE"
+    ]
+  },
+  {
+    "package": "opencc-python-reimplemented",
+    "version": "0.1.7",
+    "licenses": [
+      "opencc-python-reimplemented-opencc_python_reimplemented-0.1.7.dist-info_LICENSE.txt"
+    ]
+  },
+  {
+    "package": "packaging",
+    "version": "26.3",
+    "licenses": [
+      "packaging-packaging-26.3.dist-info_licenses_LICENSE",
+      "packaging-packaging-26.3.dist-info_licenses_LICENSE.APACHE",
+      "packaging-packaging-26.3.dist-info_licenses_LICENSE.BSD"
+    ]
+  },
+  {
+    "package": "pefile",
+    "version": "2024.8.26",
+    "licenses": [
+      "pefile-pefile-2024.8.26.dist-info_LICENSE"
+    ]
+  },
+  {
+    "package": "pip",
+    "version": "24.0",
+    "licenses": [
+      "pip-pip-24.0.dist-info_LICENSE.txt"
+    ]
+  },
+  {
+    "package": "protobuf",
+    "version": "7.36.2",
+    "licenses": [
+      "protobuf-protobuf-7.36.2.dist-info_LICENSE"
+    ]
+  },
+  {
+    "package": "PyAudioWPatch",
+    "version": "0.2.12.9",
+    "licenses": [
+      "PyAudioWPatch-pyaudiowpatch-0.2.12.9.dist-info_licenses_LICENSE.txt"
+    ]
+  },
+  {
+    "package": "pyinstaller",
+    "version": "6.22.3",
+    "licenses": [
+      "pyinstaller-pyinstaller-6.22.3.dist-info_licenses_COPYING.txt"
+    ]
+  },
+  {
+    "package": "pyinstaller-hooks-contrib",
+    "version": "2026.9",
+    "licenses": [
+      "pyinstaller-hooks-contrib-pyinstaller_hooks_contrib-2026.9.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "PySide6",
+    "version": "6.8.3",
+    "licenses": []
+  },
+  {
+    "package": "PySide6_Addons",
+    "version": "6.8.3",
+    "licenses": []
+  },
+  {
+    "package": "PySide6_Essentials",
+    "version": "6.8.3",
+    "licenses": []
+  },
+  {
+    "package": "pywin32-ctypes",
+    "version": "0.2.3",
+    "licenses": [
+      "pywin32-ctypes-pywin32_ctypes-0.2.3.dist-info_LICENSE.txt"
+    ]
+  },
+  {
+    "package": "PyYAML",
+    "version": "6.0.3",
+    "licenses": [
+      "PyYAML-pyyaml-6.0.3.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "scipy",
+    "version": "1.17.1",
+    "licenses": [
+      "scipy-scipy-1.17.1.dist-info_LICENSE.txt",
+      "scipy-scipy__lib__uarray_LICENSE"
+    ]
+  },
+  {
+    "package": "setuptools",
+    "version": "79.0.1",
+    "licenses": [
+      "setuptools-setuptools-79.0.1.dist-info_licenses_LICENSE",
+      "setuptools-setuptools__vendor_autocommand-2.2.2.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_backports.tarfile-1.2.0.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_importlib_metadata-8.0.0.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_inflect-7.3.1.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_jaraco.collections-5.1.0.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_jaraco.context-5.3.0.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_jaraco.functools-4.0.1.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_jaraco.text-3.12.1.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_more_itertools-10.3.0.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_packaging-24.2.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_platformdirs-4.2.2.dist-info_licenses_LICENSE",
+      "setuptools-setuptools__vendor_tomli-2.0.1.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_typeguard-4.3.0.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_typing_extensions-4.12.2.dist-info_LICENSE",
+      "setuptools-setuptools__vendor_wheel-0.45.1.dist-info_LICENSE.txt",
+      "setuptools-setuptools__vendor_wheel_vendored_packaging_LICENSE",
+      "setuptools-setuptools__vendor_zipp-3.19.2.dist-info_LICENSE"
+    ]
+  },
+  {
+    "package": "sherpa-onnx",
+    "version": "1.13.6",
+    "licenses": [
+      "sherpa-onnx-sherpa_onnx-1.13.6.dist-info_LICENSE"
+    ]
+  },
+  {
+    "package": "sherpa-onnx-core",
+    "version": "1.13.6",
+    "licenses": []
+  },
+  {
+    "package": "shiboken6",
+    "version": "6.8.3",
+    "licenses": []
+  },
+  {
+    "package": "tokenizers",
+    "version": "0.23.3",
+    "licenses": []
+  },
+  {
+    "package": "tqdm",
+    "version": "4.70.1",
+    "licenses": [
+      "tqdm-tqdm-4.70.1.dist-info_licenses_LICENCE"
+    ]
+  },
+  {
+    "package": "truststore",
+    "version": "0.10.5",
+    "licenses": [
+      "truststore-truststore-0.10.5.dist-info_licenses_LICENSE"
+    ]
+  },
+  {
+    "package": "typing_extensions",
+    "version": "4.16.0",
+    "licenses": [
+      "typing_extensions-typing_extensions-4.16.0.dist-info_licenses_LICENSE"
+    ]
+  }
+]

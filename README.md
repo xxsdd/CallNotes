@@ -2,6 +2,12 @@
 
 Windows 上的录音、实时字幕与通话文字稿分析工具。把电脑里聊过的事情，变成可以查找、回听和追问的本地记录。
 
+[**下载 Windows 完整安装包 · v0.1.3**](https://github.com/xxsdd/CallNotes/releases/download/v0.1.3/CallNotes-Setup-0.1.3-Windows-x64.exe)
+
+安装包约 **1.9 GB**，自带运行环境、字幕模型、说话人模型和 Codex CLI。无需安装 Python、Voice Studio 或手动配置路径。下载后双击安装，打开即可本地录音与转写；需要 AI 分析时，在 **设置 → AI 分析 → 登录 Codex** 中登录自己的账号。
+
+适用于 Windows 64 位，推荐 Windows 11。安装目录约需 2.6 GB，录音另占空间。没有 NVIDIA/CUDA 环境也可使用 CPU；字幕速度取决于电脑性能，低性能电脑可能有明显延迟。当前安装包未作商业代码签名，校验值见 [SHA256SUMS.txt](https://github.com/xxsdd/CallNotes/releases/download/v0.1.3/SHA256SUMS.txt)。
+
 [下载宣传视频](docs/callnotes-promo.mp4) · [更新日志](CHANGELOG.md)
 
 https://github.com/user-attachments/assets/f13b27e5-c227-45a1-877c-51961f1a0849
@@ -19,7 +25,7 @@ https://github.com/user-attachments/assets/f13b27e5-c227-45a1-877c-51961f1a0849
 
 ## 当前状态
 
-这是 **0.1.2 开发版源码快照**，当前运行环境为 Windows、Python 3.11、NVIDIA CUDA 与本地 faster-whisper large-v3。仓库提供源码和功能演示视频，尚未提供通用安装包或自动配置模型的安装向导。
+当前版本为 **0.1.3 Windows 安装版**。安装程序包含 Python、界面和音频依赖、large-v3-turbo 多语言字幕模型及本地说话人模型，普通使用者不需要运行下面的开发命令。首次加载模型需要准备时间。
 
 实时字幕的延迟与识别质量取决于硬件和录音条件。多人重叠、背景人声、游戏术语与人名仍可能识别错误；声音分组不等于真实身份，也不保证自动对应微信或 Discord 昵称。
 
@@ -27,34 +33,35 @@ https://github.com/user-attachments/assets/f13b27e5-c227-45a1-877c-51961f1a0849
 
 录音、文字稿和问答保存在本机。用户点击分析或提问时，相关文字资料通过本机已登录的 Codex 联网处理，使用该账户额度，原始录音不会作为分析附件上传。分析使用临时会话，本地保存同一文字稿版本的追问上下文。
 
-本仓库不包含个人录音、真实文字稿、账号配置、模型权重或 Python 运行环境。视频中的会议内容与分析结果为虚构演示，等待过程有所省略。
+源码仓库不包含个人录音、真实文字稿或账号配置。模型与运行环境放在 Releases 安装包中。视频中的会议内容与分析结果为虚构演示，等待过程有所省略。
 
 ## 开发环境启动
 
-当前代码仍保留原开发环境的 D 盘约定。首次在其他电脑运行前，需要准备以下路径或调整对应源码常量：
+以下只供开发者使用。安装版会自动找到内置环境与模型；源代码运行也兼容原来的 D 盘开发环境：
 
 | 内容 | 默认位置／入口 |
 | --- | --- |
-| 记录数据 | `D:\Apps\CallNotes-Data`，可用 `CALLNOTES_DATA` 环境变量覆盖 |
-| 缓存、锁与临时文件 | `D:\Apps\CallNotes-Cache` |
-| ASR Python | 在应用设置中指定；默认指向 `D:\Apps\VoiceStudio-Environment\project\.venv\Scripts\python.exe` |
-| ASR 模型 | 在应用设置中指定包含 `model.bin` 的 faster-whisper large-v3 本地模型目录 |
-| 可选说话人模型 | `D:\Apps\CallNotes\models\diarization` |
-| 可选 CUDA DLL | `D:\Apps\CallNotes\runtime\cudnn8`；实际版本需匹配 ASR 环境 |
+| 记录数据 | 新电脑：`%LOCALAPPDATA%\CallNotes\Data`；已存在的 `D:\Apps\CallNotes-Data` 继续使用。可用 `CALLNOTES_DATA` 覆盖 |
+| 缓存、锁与临时文件 | `%LOCALAPPDATA%\CallNotes\Cache`，可用 `CALLNOTES_CACHE` 覆盖 |
+| ASR 工作进程 | 安装目录下的 `worker\CallNotesWorker.exe`；源代码模式可在设置中指定 Python |
+| 内置字幕模型 | 安装目录下的 `models\faster-whisper-large-v3-turbo`；可在设置中指定自己的模型 |
+| 说话人模型 | 安装目录下的 `models\diarization` |
 
 创建应用环境：
 
 ```powershell
 py -3.11 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r packaging/requirements-ui.txt -r packaging/requirements-worker.txt
 .\.venv\Scripts\python.exe main.py
 ```
 
-应用界面的依赖与转写工作进程的依赖分开。ASR Python 环境需自行安装 `faster-whisper`、`av`、`numpy`、`opencc-python-reimplemented` 及与硬件匹配的 CUDA 运行库，并提前下载模型。可选说话人功能还需要 `sherpa-onnx`、`scipy`，以及 `segmentation.onnx` 和 `3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx`。模型按各自上游的许可获取，程序不会自动联网下载。
+开发模式需要提前准备本地 faster-whisper 模型；说话人功能使用 `segmentation.onnx` 与 `3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx`。实际识别不联网下载模型。CPU 使用 int8 推理；GPU 运行需要与 CTranslate2 匹配的 CUDA/cuDNN，环境不可用时自动使用 CPU。完整安装包已包含普通使用所需的 CPU 环境与模型。
 
 指定应用录音使用 Windows 进程音频捕获。源码在 `callnotes/native/process_loopback.cpp`；使用 Visual Studio C++ 与 Windows SDK 编译 `process_loopback.dll`，放在同一目录。`build.ps1` 中的编译器和 SDK 路径需按本机安装调整。该能力需要支持进程音频捕获的 Windows 版本（Windows 10 build 20348 或更新版本），建议 Windows 11。
 
-Codex 分析需要本机安装并登录 Codex，且其 CLI/App Server 支持临时会话。未配置时仍可使用本地录音和文字稿功能。
+完整安装包已附带 Codex CLI，但不会附带作者的账号或登录凭据。分析需要使用者自己的 Codex 登录；本地录音与字幕不需要登录。
+
+打包脚本位于 [packaging](packaging)。
 
 ## 测试
 

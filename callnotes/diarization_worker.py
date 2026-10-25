@@ -6,7 +6,11 @@ from pathlib import Path
 import sys
 import wave
 
-MODEL_ROOT = Path(r'D:\Apps\CallNotes\models\diarization')
+try:
+    from .runtime import speaker_models
+except ImportError:
+    from runtime import speaker_models
+MODEL_ROOT = speaker_models()
 POLICY = 'sherpa-eres2net-v4-auto-windows'
 
 

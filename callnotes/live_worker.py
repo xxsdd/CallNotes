@@ -19,6 +19,7 @@ from pathlib import Path
 from asr_worker import emit
 from text_normalization import simplified
 from asr_quality import decode_speech, uncertain_segment
+from inference import load_whisper
 
 SHUTDOWN = threading.Event()
 
@@ -28,7 +29,7 @@ def save_checkpoint(folder, segments, complete=False):
     tmp = folder / 'live-transcript.json.tmp'
     with tmp.open('w', encoding='utf-8') as handle:
         json.dump({'segments': sorted(segments, key=lambda s: (s['start'], s['track'])),
-                   'complete': complete, 'engine': 'faster-whisper-large-v3',
+                   'complete': complete, 'engine': 'faster-whisper-local',
                    'recognition_policy': 'zh-en-quality-v2', 'saved_at': time.time()}, handle, ensure_ascii=False)
         handle.flush()
         os.fsync(handle.fileno())
@@ -63,7 +64,7 @@ def load_model(model_path):
     if not (model_path / 'model.bin').exists():
         raise RuntimeError('本地模型缺失，录音会继续保存，请设置已下载的模型目录。')
     emit({'type': 'progress', 'text': '正在准备本地字幕引擎，首次打开需要几秒…'})
-    model = WhisperModel(str(model_path), device='cuda', compute_type='float16', local_files_only=True)
+    model = load_whisper(model_path, lambda text: emit({'type': 'progress', 'text': text}))
     silence = np.zeros(16000, dtype=np.float32)
     get_speech_timestamps(silence, VadOptions())
     chunks, _ = model.transcribe(silence, language='zh', beam_size=1,
